@@ -90,7 +90,7 @@ public class MailBookExchange
 			}
 			else
 			{
-				
+				receiver = randomWithRange(0, dirSize);
 			}				
 		 }
 
