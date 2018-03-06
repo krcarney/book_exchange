@@ -14,6 +14,9 @@ repeat participants can be easily accesed.
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import javax.swing.*;
+import java.awt.event.*;
+import java.awt.*;
 
 public class MailBookExchange
 {
@@ -37,13 +40,13 @@ public class MailBookExchange
          System.out.println();
          person.setFullName(kbd.next());
          
-        /* System.out.print("Enter the address of the person: ");
+         System.out.print("Enter the address of the person: ");
          System.out.println();
          person.setAddress(kbd.next());
          
          System.out.print("Enter the book they submitted: ");
          System.out.println();
-         person.setBookTitle(kbd.next());*/
+         person.setBookTitle(kbd.next());
          
          directory.add(person);
       }
@@ -54,11 +57,8 @@ public class MailBookExchange
       
       matchUp(copyDir);
    }
-   //@TO-DO
-   //Right now, this function doesn't really work if there is an odd number of people
-   //Ideally, you would just take that hanging person and swap them with someone
-   //who has already been swapped, but that is not possible since we removed
-   //everyone who has been swapped from that directory already.
+
+   
    static void matchUp(ArrayList<Individual> dir)
    {
       ArrayList<Individual> usedIndividual = new ArrayList<Individual>();
@@ -66,22 +66,41 @@ public class MailBookExchange
       while(!(dir.isEmpty()))
       {
          int dirSize = dir.size()-1;
-         int person1 = randomWithRange(0, dirSize);
-         int person2 = randomWithRange(0, dirSize);
+         int giver = randomWithRange(0, dirSize);
+         int receiver = randomWithRange(0, dirSize);
+		 boolean uniquePair = false;
          
          //just making sure no one is getting themselves
-         while (person1 == person2)
+         while (giver == receiver)
          {
-            person2 = randomWithRange(0, dirSize);
+            receiver = randomWithRange(0, dirSize);
          }
-         usedIndividual.add(dir.get(person1));
+		 
+		 //@CLEANUP
+		 //This is our solution of what to do in an odd number person scenario.
+		 //We are making sure that no one is getting the same book from the person they are
+		 //giving to. This stops one person from being left out, but ideally anyone could 
+		 //get anyone and it would still work.
+		 while(!uniquePair)
+		 {
+			if (dir.get(receiver).getGivingTo() == null || dir.get(receiver).getGivingTo() != dir.get(giver))
+			{
+				dir.get(giver).setGivingTo(dir.get(receiver));
+				uniquePair = true;
+			}
+			else
+			{
+				
+			}				
+		 }
+
+		 
+		 dir.get(giver).setGivingTo(dir.get(receiver));
+         usedIndividual.add(dir.get(giver));
          
-         //@TO-DO
-         //This is just superficially printing it. Would like to have that
-         //connection actually stored somewhere.
-         System.out.printf("%s gives their book to %s", dir.get(person1).getFullName(), dir.get(person2).getFullName());
+         System.out.printf("%s gives their book to %s", dir.get(giver).getFullName(), dir.get(giver).getGivingTo());
          System.out.println();
-         dir.remove(person1);
+         dir.remove(giver);
       }
    } 
    
@@ -140,6 +159,8 @@ class Individual
       }
       else if (fullName == person.getFullName())
       {
+		 //@TO-DO
+		 //This should be some sort of error message, but I don't know how to do that
          System.out.println("You tried to give a person the same person.");
       }
    }
@@ -148,4 +169,9 @@ class Individual
    {
       return givingTo;
    }
+}
+
+class GuiConstructor
+{
+	
 }
