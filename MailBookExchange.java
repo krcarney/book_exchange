@@ -52,62 +52,73 @@ public class MailBookExchange
       }
       //making a copy of the directory so we can remove stuff without
       //losing the information forever
-      ArrayList<Individual> copyDir = new ArrayList<Individual>();
-      copyDir.addAll(directory);
+      //ArrayList<Individual> copyDir = new ArrayList<Individual>();
+      //copyDir.addAll(directory);
       
-      matchUp(copyDir);
+      matchUp(directory, numberOfPeople);
+      System.out.print("all done!");
    }
 
    
-   static void matchUp(ArrayList<Individual> dir)
+   static void matchUp(ArrayList<Individual> dir, int numOfParticipants)
    {
       ArrayList<Individual> usedIndividual = new ArrayList<Individual>();
       
-      while(!(dir.isEmpty()))
+      for (int i = 1; i <= numOfParticipants; i++)
       {
          int dirSize = dir.size()-1;
-         int giver = randomWithRange(0, dirSize);
+         int giver = i-1;
          int receiver = randomWithRange(0, dirSize);
-		 boolean uniquePair = false;
-         
-         //just making sure no one is getting themselves
-         while (giver == receiver)
+         boolean uniquePair = false;         
+      
+         //check to see if the receiver has already gotten a book
+         while (dir.get(receiver).getHasReceived() == true)
          {
             receiver = randomWithRange(0, dirSize);
+            //just making sure no one is getting themselves		 
+            while (giver == receiver)
+            {
+               receiver = randomWithRange(0, dirSize);
+            }
          }
-		 
-		 //@CLEANUP
-		 //This is our solution of what to do in an odd number person scenario.
-		 //We are making sure that no one is getting the same book from the person they are
-		 //giving to. This stops one person from being left out, but ideally anyone could 
-		 //get anyone and it would still work.
-		 while(!uniquePair)
-		 {
-			if (dir.get(receiver).getGivingTo() == null || dir.get(receiver).getGivingTo() != dir.get(giver))
-			{
-				dir.get(giver).setGivingTo(dir.get(receiver));
-				uniquePair = true;
-			}
-			else
-			{
-				receiver = randomWithRange(0, dirSize);
-			}				
-		 }
-
-		 
-		 dir.get(giver).setGivingTo(dir.get(receiver));
-         usedIndividual.add(dir.get(giver));
+       
+		//@CLEANUP
+		//This is our solution of what to do in an odd number person scenario.
+		//We are making sure that no one is getting the same book from the person they are
+		//giving to. This stops one person from being left out. Ideally though, anyone could 
+		//get anyone and it would still work.
+         while(!uniquePair)
+         {
+            if (dir.get(receiver).getGivingTo() == dir.get(giver))
+            {
+               receiver = randomWithRange(0, dirSize);
+			   //Since we're generating a new number, we have to check again
+			   //that we've not giving a person themselves
+               while (giver == receiver)
+               {
+                  receiver = randomWithRange(0, dirSize);
+               }
+            }
+            else
+            {
+               dir.get(giver).setGivingTo(dir.get(receiver));
+               uniquePair = true;				
+            }				
+         }
+      
+         dir.get(giver).setGivingTo(dir.get(receiver));
+         dir.get(receiver).setHasReceived(true);
          
-         System.out.printf("%s gives their book to %s", dir.get(giver).getFullName(), dir.get(giver).getGivingTo());
+         System.out.printf("%s gives their book to %s", dir.get(giver).getFullName(), dir.get(giver).getGivingTo().getFullName());
          System.out.println();
-         dir.remove(giver);
       }
    } 
    
    static int randomWithRange(int min, int max)
    {
       int range = (max - min) + 1;
-      return (int) (Math.random() * range) + min; 
+      int output = (int) (Math.random() * range) + min; 
+      return output;
    }  
 }
 
@@ -117,7 +128,9 @@ class Individual
    private String fullName;
    private String address;
    private String bookTitle;
+   private boolean hasReceived = false;
    private Individual givingTo;
+
    
    //requisite getters and setters
    public void setFullName(String newName)
@@ -150,19 +163,23 @@ class Individual
       return bookTitle;
    }
    
-   //this is our way of tracking who got who
+   public void setHasReceived(boolean receiving)
+   {
+      hasReceived = receiving;
+   }
+   
+   public boolean getHasReceived()
+   {
+      return hasReceived;
+   }
+   
+   
+   //@CLEANUP
+   //In a perfect world, this would throw an error if you tried
+   //to give someone themselves
    public void setGivingTo(Individual person)
    {
-      if (fullName != person.getFullName())
-      {
-         givingTo = person;
-      }
-      else if (fullName == person.getFullName())
-      {
-		 //@TO-DO
-		 //This should be some sort of error message, but I don't know how to do that
-         System.out.println("You tried to give a person the same person.");
-      }
+      givingTo = person;
    }
    
    public Individual getGivingTo()
