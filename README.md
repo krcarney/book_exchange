@@ -1,1 +1,1 @@
-"# book_exchange" 
+"Project to shuffle participants in a book exchange" 
