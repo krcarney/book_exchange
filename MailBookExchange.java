@@ -6,6 +6,8 @@ gets a different book from someone else.
 Written by Kevin Carney
 */
 
+//Full base functionality now in place! 3/7/18
+
 /* EXPANDED FUNCTIONALITY TO DO:
 - Pretty GUI
 - Save each person's information in a text file so that
@@ -26,34 +28,33 @@ public class MailBookExchange
       ArrayList<Individual> directory = new ArrayList<Individual>();
       Scanner kbd = new Scanner(System.in);
    
-      System.out.print("How many people are there? ");
-      int numberOfPeople = kbd.nextInt();
+      int numberOfPeople = 0;
       System.out.println();
       
-      //@CLEANUP
-      //this is a hack because I don't know how to dynamically make more
-      //objects as the inputs come in. But it works. 
-      for (int i=1; i <= numberOfPeople; i++)
+      while (true)
       {
-         Individual person = new Individual();
-         System.out.print("Enter the full name of the person: ");
+         System.out.print("Enter the full name of the person (type STOP when done): ");
          System.out.println();
-         person.setFullName(kbd.next());
+		 String strName = kbd.next();
+		 if (strName.equals("STOP") || strName.equals("stop"))
+		 {
+			 break;
+		 }
+
+		 Individual person = new Individual();
+		 numberOfPeople += 1;
+         person.setFullName(strName);
          
-         System.out.print("Enter the address of the person: ");
+         /*System.out.print("Enter the address of the person: ");
          System.out.println();
          person.setAddress(kbd.next());
          
          System.out.print("Enter the book they submitted: ");
          System.out.println();
-         person.setBookTitle(kbd.next());
+         person.setBookTitle(kbd.next());*/
          
          directory.add(person);
       }
-      //making a copy of the directory so we can remove stuff without
-      //losing the information forever
-      //ArrayList<Individual> copyDir = new ArrayList<Individual>();
-      //copyDir.addAll(directory);
       
       matchUp(directory, numberOfPeople);
       System.out.print("all done!");
@@ -86,7 +87,9 @@ public class MailBookExchange
 		//This is our solution of what to do in an odd number person scenario.
 		//We are making sure that no one is getting the same book from the person they are
 		//giving to. This stops one person from being left out. Ideally though, anyone could 
-		//get anyone and it would still work.
+		//get anyone and it would still work. Also, this method does not work with two people.
+		//That probably won't happen unless it's a very sad book exchange, but it's worth
+		//noting.
          while(!uniquePair)
          {
             if (dir.get(receiver).getGivingTo() == dir.get(giver))
